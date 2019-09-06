@@ -66,6 +66,7 @@ public final class NexusHttpProxy {
             origRes.headers().setAll(proxiedRes.headers());
             origRes.setStatusCode(proxiedRes.statusCode());
             origRes.setChunked(true);
+            origRes.headers().remove(HttpHeaders.CONTENT_LENGTH);
             proxiedRes.handler(origRes::write);
             proxiedRes.endHandler(v -> origRes.end());
         };
@@ -79,6 +80,7 @@ public final class NexusHttpProxy {
         proxiedReq.setChunked(true);
         proxiedReq.headers().add(X_FORWARDED_PROTO, getHeader(origReq, X_FORWARDED_PROTO, origReq.scheme()));
         proxiedReq.headers().add(X_FORWARDED_FOR, getHeader(origReq, X_FORWARDED_FOR, origReq.remoteAddress().host()));
+        proxiedReq.headers().remove(HttpHeaders.CONTENT_LENGTH);
         injectRutHeader(proxiedReq, userId);
         origReq.handler(proxiedReq::write);
         origReq.endHandler(v -> proxiedReq.end());
